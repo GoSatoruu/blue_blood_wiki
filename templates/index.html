@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block meta_description %}Blue Blood Wiki — Browse recent articles, explore categories, and discover the lore of the Blue Blood universe.{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero Section ──────────────────────────────────────────────────────── -->
+<section class="hero" aria-label="Search the wiki">
+  <p class="hero__eyebrow">Community Encyclopaedia</p>
+  <h1 class="hero__title">Welcome to <em>Blue Blood</em> Wiki</h1>
+  <p class="hero__subtitle">
+    The fan-maintained knowledge base for the Blue Blood universe —<br>
+    characters, lore, history, and more.
+  </p>
+
+  <div class="hero__search" role="search" aria-label="Main search">
+    <span class="hero__search-icon" aria-hidden="true">🔍</span>
+    <input
+      id="hero-search-input"
+      class="hero__search-input"
+      type="search"
+      placeholder="Search characters, events, lore…"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      aria-label="Search wiki"
+      data-search-input
+      data-search-dropdown="hero-search-dropdown"
+      data-search-base-url="/search"
+    >
+    <button
+      class="hero__search-btn"
+      id="hero-search-btn"
+      aria-label="Submit search"
+      onclick="if(document.getElementById('hero-search-input').value.trim()){window.location='/search?q='+encodeURIComponent(document.getElementById('hero-search-input').value.trim())}"
+    >Search</button>
+    <div id="hero-search-dropdown" class="hero__search-dropdown" role="listbox" aria-label="Search suggestions"></div>
+  </div>
+</section>
+
+<!-- ── Main Content ───────────────────────────────────────────────────────── -->
+<div class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-2xl);">
+
+  <!-- Featured Categories -->
+  <section aria-labelledby="categories-heading" class="mb-xl">
+    <div class="section-header">
+      <h2 class="section-title" id="categories-heading">Browse Categories</h2>
+    </div>
+
+    {% if categories %}
+    <div class="categories-grid">
+      {% set category_icons = {
+        'Characters': '🧛',
+        'Lore': '📜',
+        'History': '⚔️',
+        'Locations': '🗺️',
+        'Factions': '🏰',
+        'Abilities': '✨',
+        'Items': '💎',
+        'General': '📖',
+        'Events': '📅',
+        'Creatures': '🐺'
+      } %}
+      {% for cat in categories %}
+      <a href="/category/{{ cat.category | urlencode }}" class="category-badge" id="cat-badge-{{ loop.index }}">
+        <span class="category-badge__icon" aria-hidden="true">{{ category_icons.get(cat.category, '📂') }}</span>
+        <span class="category-badge__name">{{ cat.category }}</span>
+        <span class="category-badge__count">{{ cat.article_count }} article{% if cat.article_count != 1 %}s{% endif %}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">📂</div>
+      <p class="empty-state__title">No categories yet</p>
+      <p class="empty-state__desc">Create your first article to get started.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Recent Articles -->
+  <section aria-labelledby="recent-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="recent-heading">Recent Articles</h2>
+      <a href="/search" class="section-link" id="view-all-link">View All →</a>
+    </div>
+
+    {% if recent_articles %}
+    <div class="articles-grid">
+      {% for article in recent_articles %}
+      {% set tag_list = article.tags.split(',') if article.tags else [] %}
+      <a
+        href="/wiki/{{ article.slug }}"
+        class="article-card"
+        id="article-card-{{ article.id }}"
+        aria-label="Read {{ article.title }}"
+      >
+        <span class="article-card__category">{{ article.category }}</span>
+        <h3 class="article-card__title">{{ article.title }}</h3>
+        <p class="article-card__excerpt">
+          {{ article.content | replace('#', '') | replace('*', '') | replace('_', '') | truncate(120) }}
+        </p>
+        <div class="article-card__footer">
+          <span class="article-card__date">{{ article.updated_at | format_date }}</span>
+          <span class="article-card__views">👁 {{ article.view_count }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">✍️</div>
+      <p class="empty-state__title">No articles yet</p>
+      <p class="empty-state__desc">Be the first to contribute to the wiki.</p>
+      <a href="/wiki/new-article/edit" class="btn btn--primary mt-md" id="create-first-article-btn">Create First Article</a>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Call to action strip -->
+  {% if recent_articles %}
+  <div style="
+    margin-top: var(--space-2xl);
+    padding: var(--space-xl) var(--space-lg);
+    background: linear-gradient(135deg, rgba(155,28,46,0.08), rgba(155,28,46,0.03));
+    border: 1px solid rgba(155,28,46,0.2);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  ">
+    <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: var(--space-sm);">
+      Help Build the Wiki
+    </h2>
+    <p style="color: var(--text-secondary); margin-bottom: var(--space-lg); font-size: 0.95rem;">
+      This wiki is community-maintained. Every article you write helps fans explore the Blue Blood universe.
+    </p>
+    <a href="/wiki/new-article/edit" class="btn btn--primary btn--lg" id="contribute-btn">✍️ Write an Article</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

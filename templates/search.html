@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block meta_description %}Search results for "{{ query }}" — Blue Blood Wiki.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="search-page">
+
+    <div class="search-page__header">
+      <h1 class="search-page__title">
+        {% if query %}Search Results{% else %}Search the Wiki{% endif %}
+      </h1>
+      {% if query and results %}
+      <p class="search-page__count">
+        Found <strong>{{ results | length }}</strong> result{% if results | length != 1 %}s{% endif %} for "<strong>{{ query }}</strong>"
+      </p>
+      {% elif query %}
+      <p class="search-page__count">No results found for "<strong>{{ query }}</strong>"</p>
+      {% endif %}
+    </div>
+
+    <!-- Search form -->
+    <form class="search-page__form" action="/search" method="get" role="search">
+      <input
+        id="search-page-input"
+        name="q"
+        type="search"
+        class="search-page__input"
+        placeholder="Search articles, characters, lore…"
+        value="{{ query }}"
+        autocomplete="off"
+        autocorrect="off"
+        aria-label="Search query"
+        autofocus
+      >
+      <button type="submit" class="btn btn--primary" id="search-submit-btn" style="height:48px;padding:0 var(--space-xl);">
+        🔍 Search
+      </button>
+    </form>
+
+    <!-- Results -->
+    {% if query %}
+      {% if results %}
+        <div aria-label="Search results" aria-live="polite">
+          {% for r in results %}
+          <a href="/wiki/{{ r.slug }}" class="search-result-card" id="result-{{ loop.index }}">
+            <div class="search-result-card__title">{{ r.title }}</div>
+            <div class="search-result-card__meta">
+              <span style="font-weight:600;color:var(--accent-primary);">{{ r.category }}</span>
+              {% if r.tags %}
+              <span>·</span>
+              {% for tag in r.tags.split(',') %}
+              {% if tag.strip() %}
+              <span class="tag" style="height:20px;font-size:0.7rem;">{{ tag.strip() }}</span>
+              {% endif %}
+              {% endfor %}
+              {% endif %}
+            </div>
+            {% if r.snippet %}
+            <div class="search-result-card__snippet">{{ r.snippet }}</div>
+            {% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state__icon">🔍</div>
+          <p class="empty-state__title">No results found</p>
+          <p class="empty-state__desc">
+            Try different keywords, or
+            <a href="/wiki/{{ query | lower | replace(' ', '-') }}/edit" style="color:var(--accent-primary);">
+              create an article about "{{ query }}"
+            </a>.
+          </p>
+        </div>
+      {% endif %}
+    {% else %}
+      <!-- No query yet: show browse prompt -->
+      <div class="empty-state" style="padding: var(--space-xl) 0;">
+        <div class="empty-state__icon">📚</div>
+        <p class="empty-state__title">What are you looking for?</p>
+        <p class="empty-state__desc">Type a character name, event, or lore term above.</p>
+      </div>
+
+      {% if categories %}
+      <div class="section-header mt-xl">
+        <h2 class="section-title">Browse by Category</h2>
+      </div>
+      <div class="categories-grid">
+        {% set category_icons = {
+          'Characters': '🧛',
+          'Lore': '📜',
+          'History': '⚔️',
+          'Locations': '🗺️',
+          'Factions': '🏰',
+          'Abilities': '✨',
+          'Items': '💎',
+          'General': '📖',
+          'Events': '📅',
+          'Creatures': '🐺'
+        } %}
+        {% for cat in categories %}
+        <a href="/category/{{ cat.category | urlencode }}" class="category-badge" id="cat-search-{{ loop.index }}">
+          <span class="category-badge__icon" aria-hidden="true">{{ category_icons.get(cat.category, '📂') }}</span>
+          <span class="category-badge__name">{{ cat.category }}</span>
+          <span class="category-badge__count">{{ cat.article_count }} article{% if cat.article_count != 1 %}s{% endif %}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

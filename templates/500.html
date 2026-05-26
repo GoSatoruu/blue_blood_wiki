@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block meta_description %}Server error — Blue Blood Wiki.{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <div class="error-page__code" aria-hidden="true">500</div>
+  <h1 class="error-page__title">Something Went Wrong</h1>
+  <p class="error-page__subtitle">
+    An unexpected error occurred on our end. Please try again in a moment.
+  </p>
+  <div class="error-page__actions">
+    <a href="/" class="btn btn--primary btn--lg" id="home-btn">← Back to Home</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block meta_description %}Articles in the {{ category_name }} category — Blue Blood Wiki.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div style="padding: var(--space-xl) 0 var(--space-2xl);">
+
+    <!-- Header -->
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="article-breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">{{ category_name }}</span>
+    </nav>
+
+    <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--text-primary);margin:var(--space-md) 0 var(--space-xs);">
+      {{ category_name }}
+    </h1>
+    <p style="color:var(--text-secondary);margin-bottom:var(--space-xl);">
+      {{ articles | length }} article{% if articles | length != 1 %}s{% endif %} in this category
+    </p>
+
+    <!-- Articles -->
+    {% if articles %}
+    <div class="articles-grid">
+      {% for article in articles %}
+      {% set tag_list = article.tags.split(',') if article.tags else [] %}
+      <a href="/wiki/{{ article.slug }}" class="article-card" id="cat-article-{{ article.id }}">
+        <span class="article-card__category">{{ article.category }}</span>
+        <h2 class="article-card__title">{{ article.title }}</h2>
+        <p class="article-card__excerpt">
+          {{ article.content | replace('#', '') | replace('*', '') | replace('_', '') | truncate(120) }}
+        </p>
+        <div class="article-card__footer">
+          <span class="article-card__date">{{ article.updated_at | format_date }}</span>
+          <span class="article-card__views">👁 {{ article.view_count }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">📭</div>
+      <p class="empty-state__title">No articles in this category yet</p>
+      <p class="empty-state__desc">Be the first to create an article in {{ category_name }}.</p>
+      <a href="/wiki/new-article/edit" class="btn btn--primary mt-md">✍️ Create Article</a>
+    </div>
+    {% endif %}
+
+    <!-- Other categories sidebar strip -->
+    {% if categories %}
+    <div class="divider"></div>
+    <h2 class="section-title mb-md">Other Categories</h2>
+    <div class="categories-grid">
+      {% set category_icons = {
+        'Characters': '🧛', 'Lore': '📜', 'History': '⚔️',
+        'Locations': '🗺️', 'Factions': '🏰', 'Abilities': '✨',
+        'Items': '💎', 'General': '📖', 'Events': '📅', 'Creatures': '🐺'
+      } %}
+      {% for cat in categories %}
+      {% if cat.category != category_name %}
+      <a href="/category/{{ cat.category | urlencode }}" class="category-badge" id="other-cat-{{ loop.index }}">
+        <span class="category-badge__icon" aria-hidden="true">{{ category_icons.get(cat.category, '📂') }}</span>
+        <span class="category-badge__name">{{ cat.category }}</span>
+        <span class="category-badge__count">{{ cat.article_count }}</span>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block meta_description %}{% if is_new %}Create a new article{% else %}Edit {{ article.title }}{% endif %} — Blue Blood Wiki{% endblock %}
+
+{% block extra_head %}
+<!-- editor.js is loaded at end of body via extra_scripts -->
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="editor-layout">
+
+    <!-- Header -->
+    <div class="editor-header">
+      <nav class="article-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="article-breadcrumb-sep" aria-hidden="true">›</span>
+        {% if not is_new %}
+          <a href="/wiki/{{ slug }}">{{ article.title }}</a>
+          <span class="article-breadcrumb-sep" aria-hidden="true">›</span>
+          <span aria-current="page">Edit</span>
+        {% else %}
+          <span aria-current="page">Create New Article</span>
+        {% endif %}
+      </nav>
+      <h1 class="editor-title">
+        {% if is_new %}Create New Article{% else %}Edit: {{ article.title }}{% endif %}
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 6px;">
+        Write in <strong>Markdown</strong>. Live preview updates as you type.
+        Press <kbd style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:0.8rem;">Ctrl+S</kbd> to save.
+      </p>
+    </div>
+
+    <form
+      id="wiki-edit-form"
+      method="post"
+      action="/wiki/{{ slug }}/edit"
+      data-is-new="{{ 'true' if is_new else 'false' }}"
+      novalidate
+    >
+
+      <!-- ── Metadata Row ───────────────────────────────────────────────── -->
+      <div class="form-row">
+
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label" for="title-input">
+            Title <span class="required">*</span>
+          </label>
+          <input
+            id="title-input"
+            name="title"
+            type="text"
+            class="form-input"
+            placeholder="Article title…"
+            value="{{ article.title if article else '' }}"
+            required
+            maxlength="300"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="category-input">Category</label>
+          <input
+            id="category-input"
+            name="category"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Characters"
+            value="{{ article.category if article else 'General' }}"
+            list="category-suggestions"
+            maxlength="100"
+          >
+          <datalist id="category-suggestions">
+            {% if categories %}
+              {% for cat in categories %}
+              <option value="{{ cat.category }}">
+              {% endfor %}
+            {% endif %}
+            <option value="Characters">
+            <option value="Lore">
+            <option value="History">
+            <option value="Locations">
+            <option value="Factions">
+            <option value="Abilities">
+            <option value="Items">
+            <option value="Events">
+            <option value="Creatures">
+          </datalist>
+        </div>
+
+      </div>
+
+      <!-- ── Slug & Tags Row ──────────────────────────────────────────────── -->
+      <div class="form-row" style="grid-template-columns: 1fr 2fr;">
+
+        <div class="form-group">
+          <label class="form-label" for="slug-input">
+            Slug <span class="required">*</span>
+          </label>
+          <input
+            id="slug-input"
+            name="new_slug"
+            type="text"
+            class="form-input"
+            placeholder="url-safe-slug"
+            value="{{ slug }}"
+            {% if not is_new %}readonly{% endif %}
+            pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+            title="Lowercase letters, numbers, and hyphens only"
+            maxlength="200"
+          >
+          <span class="form-hint" id="slug-preview">
+            /wiki/{{ slug }}
+          </span>
+          {% if not is_new %}
+          <span class="form-hint" style="color: var(--accent-primary);">Slug cannot be changed after creation.</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tags-input">
+            Tags
+          </label>
+          <input
+            id="tags-input"
+            name="tags"
+            type="text"
+            class="form-input"
+            placeholder="character, vampire, antagonist (comma-separated)"
+            value="{{ article.tags if article else '' }}"
+            maxlength="500"
+          >
+          <span class="form-hint">Separate tags with commas. Tags are lowercased automatically.</span>
+        </div>
+
+      </div>
+
+      <!-- ── Editor Panes ─────────────────────────────────────────────────── -->
+      <div class="editor-panes" style="margin-top: var(--space-sm);">
+
+        <!-- Write Pane -->
+        <div class="editor-pane">
+          <div class="editor-pane__header">
+            <span>Markdown Source</span>
+            <span class="editor-pane__badge">Write</span>
+          </div>
+          <div id="editor-toolbar" style="display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg-elevated);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;" role="toolbar" aria-label="Formatting toolbar">
+            <button class="editor-toolbar-btn" data-action="bold" title="Bold (Ctrl+B)" aria-label="Bold">𝐁</button>
+            <button class="editor-toolbar-btn" data-action="italic" title="Italic (Ctrl+I)" aria-label="Italic">𝐼</button>
+            <button class="editor-toolbar-btn" data-action="strike" title="Strikethrough" aria-label="Strikethrough" style="text-decoration:line-through;">S</button>
+            <span class="editor-toolbar-sep" aria-hidden="true"></span>
+            <button class="editor-toolbar-btn" data-action="h2" title="Heading 2" aria-label="Heading 2">H2</button>
+            <button class="editor-toolbar-btn" data-action="h3" title="Heading 3" aria-label="Heading 3">H3</button>
+            <span class="editor-toolbar-sep" aria-hidden="true"></span>
+            <button class="editor-toolbar-btn" data-action="ul" title="Unordered list" aria-label="Unordered list">• —</button>
+            <button class="editor-toolbar-btn" data-action="ol" title="Ordered list" aria-label="Ordered list">1.</button>
+            <button class="editor-toolbar-btn" data-action="blockquote" title="Blockquote" aria-label="Blockquote">"</button>
+            <span class="editor-toolbar-sep" aria-hidden="true"></span>
+            <button class="editor-toolbar-btn" data-action="code" title="Inline code" aria-label="Inline code">`</button>
+            <button class="editor-toolbar-btn" data-action="codeblock" title="Code block" aria-label="Code block">```</button>
+            <button class="editor-toolbar-btn" data-action="link" title="Insert link" aria-label="Insert link">🔗</button>
+            <button class="editor-toolbar-btn" data-action="hr" title="Horizontal rule" aria-label="Horizontal rule">—</button>
+          </div>
+          <textarea
+            id="content-editor"
+            name="content"
+            class="form-textarea"
+            placeholder="Start writing in Markdown…
+
+# Article Title
+
+Write your content here. Use **bold**, *italic*, and [links](url).
+
+## Section Heading
+
+- Bullet point one
+- Bullet point two
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |"
+            aria-label="Article content in Markdown"
+            spellcheck="true"
+          >{{ article.content if article else '' }}</textarea>
+          <div class="editor-toolbar" style="justify-content:flex-end;">
+            <span id="char-count" style="font-size:0.75rem;color:var(--text-muted);">0 chars</span>
+          </div>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="editor-pane">
+          <div class="editor-pane__header">
+            <span>Preview</span>
+            <span class="editor-pane__badge editor-pane__badge--preview">Live</span>
+          </div>
+          <div id="preview-pane" class="editor-preview article-content" aria-live="polite" aria-label="Live preview">
+            <p class="editor-preview-placeholder">Your formatted preview will appear here as you type…</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Actions ──────────────────────────────────────────────────────── -->
+      <div class="editor-actions">
+        <button type="submit" class="btn btn--primary btn--lg" id="save-btn">
+          💾 {{ 'Create Article' if is_new else 'Save Changes' }}
+        </button>
+        <a
+          href="{% if not is_new %}/wiki/{{ slug }}{% else %}/{% endif %}"
+          class="btn btn--outline"
+          id="cancel-btn"
+        >Cancel</a>
+        <span style="flex:1;"></span>
+        <span style="font-size:0.78rem;color:var(--text-muted);">
+          ⌨️ <kbd style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:3px;padding:1px 5px;">Ctrl+S</kbd> to save quickly
+        </span>
+      </div>
+
+    </form>
+
+    <!-- Markdown cheatsheet -->
+    <details style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+      <summary style="cursor:pointer;font-weight:600;color:var(--text-secondary);font-size:0.875rem;user-select:none;">
+        📚 Markdown Cheatsheet
+      </summary>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg);margin-top:var(--space-md);font-size:0.825rem;">
+        <div>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><th style="text-align:left;padding:4px 8px;color:var(--text-muted);font-size:0.7rem;text-transform:uppercase;">Syntax</th><th style="text-align:left;padding:4px 8px;color:var(--text-muted);font-size:0.7rem;text-transform:uppercase;">Result</th></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`**bold**`</td><td style="padding:4px 8px;"><strong>bold</strong></td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`*italic*`</td><td style="padding:4px 8px;"><em>italic</em></td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`~~strike~~`</td><td style="padding:4px 8px;"><del>strike</del></td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`# H1`</td><td style="padding:4px 8px;">Heading 1</td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`## H2`</td><td style="padding:4px 8px;">Heading 2</td></tr>
+          </table>
+        </div>
+        <div>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><th style="text-align:left;padding:4px 8px;color:var(--text-muted);font-size:0.7rem;text-transform:uppercase;">Syntax</th><th style="text-align:left;padding:4px 8px;color:var(--text-muted);font-size:0.7rem;text-transform:uppercase;">Result</th></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`- item`</td><td style="padding:4px 8px;">Bullet list</td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`1. item`</td><td style="padding:4px 8px;">Numbered list</td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`> quote`</td><td style="padding:4px 8px;">Blockquote</td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`[text](url)`</td><td style="padding:4px 8px;">Hyperlink</td></tr>
+            <tr><td style="padding:4px 8px;font-family:var(--font-mono);">`---`</td><td style="padding:4px 8px;">Horizontal rule</td></tr>
+          </table>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', path='js/editor.js') }}"></script>
+{% endblock %}

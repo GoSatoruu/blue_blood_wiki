@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}Blue Blood Wiki — A community-built encyclopedia for the Blue Blood universe.{% endblock %}">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="{{ page_title | default('Blue Blood Wiki') }}">
+  <meta property="og:description" content="{% block og_description %}Blue Blood Wiki — The definitive fan encyclopaedia for lore, characters, and history.{% endblock %}">
+  <meta property="og:type" content="website">
+  <title>{{ page_title | default('Blue Blood Wiki') }}</title>
+
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Favicon (inline SVG data URI) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩸</text></svg>">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/wiki.css') }}">
+
+  <!-- Theme script runs FIRST to prevent flash of wrong theme -->
+  <script src="{{ url_for('static', path='js/theme.js') }}"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────────────────────── -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__brand">
+      <a href="/" class="nav__brand" id="nav-home-link" aria-label="Blue Blood Wiki Home">
+        <div class="nav__logo-icon" aria-hidden="true">🩸</div>
+        <span class="nav__title"><span>Blue</span> Blood Wiki</span>
+      </a>
+    </div>
+
+    <div class="nav__search">
+      <span class="nav__search-icon" aria-hidden="true">🔍</span>
+      <input
+        id="nav-search-input"
+        class="nav__search-input"
+        type="search"
+        placeholder="Search articles, characters, lore…"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        aria-label="Search wiki articles"
+        data-search-input
+        data-search-dropdown="nav-search-dropdown"
+        data-search-base-url="/search"
+      >
+      <div id="nav-search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <div class="nav__actions">
+      <a href="/" class="nav__link" id="nav-link-home">Home</a>
+      <a href="/search" class="nav__link" id="nav-link-search">Search</a>
+      <a href="/wiki/new-article/edit" class="nav__link" id="nav-link-new" style="color: var(--accent-secondary);">+ New Article</a>
+      <button
+        class="btn-theme"
+        id="theme-toggle-btn"
+        data-theme-toggle
+        aria-label="Switch theme"
+        title="Toggle dark/light mode"
+      >🌙</button>
+    </div>
+  </nav>
+
+  <!-- ── Page Content ───────────────────────────────────────────────────── -->
+  <main class="page-wrapper" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <strong>Blue Blood Wiki</strong> — A fan-made encyclopedia. Not affiliated with any official publisher.
+      </div>
+      <nav class="footer__links" aria-label="Footer navigation">
+        <a href="/">Home</a>
+        <a href="/search">Search</a>
+        <a href="/wiki/blue-blood-overview">Overview</a>
+        <a href="/wiki/new-article/edit">Contribute</a>
+        <a href="/api/docs">API</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ── Toast container ────────────────────────────────────────────────── -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ── Scripts ────────────────────────────────────────────────────────── -->
+  <script src="{{ url_for('static', path='js/search.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+
+  <script>
+    // Toast utility available globally
+    window.showToast = function(msg, durationMs) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), durationMs || 3000);
+    };
+  </script>
+</body>
+</html>

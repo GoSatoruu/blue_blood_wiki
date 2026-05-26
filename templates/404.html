@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block meta_description %}Page not found — Blue Blood Wiki.{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <div class="error-page__code" aria-hidden="true">404</div>
+  <h1 class="error-page__title">Page Not Found</h1>
+  <p class="error-page__subtitle">
+    {% if slug %}
+      The article <strong>"{{ slug }}"</strong> doesn't exist yet in the wiki.
+      <br>Want to be the first to write it?
+    {% else %}
+      The page you're looking for doesn't exist or may have been moved.
+    {% endif %}
+  </p>
+  <div class="error-page__actions">
+    {% if slug %}
+    <a href="/wiki/{{ slug }}/edit" class="btn btn--primary btn--lg" id="create-page-btn">
+      ✍️ Create "{{ slug }}"
+    </a>
+    {% endif %}
+    <a href="/" class="btn btn--outline btn--lg" id="back-home-btn">← Back to Home</a>
+    <a href="/search" class="btn btn--ghost btn--lg" id="search-btn">🔍 Search Wiki</a>
+  </div>
+
+  <!-- Decorative blood-drop illustration using pure CSS -->
+  <div aria-hidden="true" style="
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    opacity: 0.04;
+    font-size: 180px;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  ">🩸</div>
+</div>
+{% endblock %}

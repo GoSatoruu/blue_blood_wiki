@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block meta_description %}{{ article.title }} — Blue Blood Wiki. {{ article.tags }}{% endblock %}
+{% block og_description %}Read about {{ article.title }} on Blue Blood Wiki.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="article-layout">
+
+    <!-- ── Main Article Content ───────────────────────────────────────── -->
+    <article class="article-main" aria-labelledby="article-title">
+
+      <!-- Breadcrumb -->
+      <nav class="article-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="article-breadcrumb-sep" aria-hidden="true">›</span>
+        <a href="/category/{{ article.category | urlencode }}">{{ article.category }}</a>
+        <span class="article-breadcrumb-sep" aria-hidden="true">›</span>
+        <span aria-current="page">{{ article.title }}</span>
+      </nav>
+
+      <!-- Header -->
+      <header class="article-header">
+        <h1 class="article-title" id="article-title">{{ article.title }}</h1>
+
+        <div class="article-meta">
+          <span class="article-meta__item">
+            <a href="/category/{{ article.category | urlencode }}" class="article-meta__category-link">
+              {{ article.category }}
+            </a>
+          </span>
+          <span class="article-meta__item">
+            📅 Created {{ article.created_at | format_date }}
+          </span>
+          <span class="article-meta__item">
+            ✏️ Updated {{ article.updated_at | format_date }}
+          </span>
+          <span class="article-meta__item">
+            👁 {{ article.view_count }} view{% if article.view_count != 1 %}s{% endif %}
+          </span>
+        </div>
+
+        {% if tag_list %}
+        <div class="tags-row mt-sm" aria-label="Tags">
+          {% for tag in tag_list %}
+          <a href="/search?q={{ tag | urlencode }}" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="article-actions">
+          <a href="/wiki/{{ article.slug }}/edit" class="btn btn--outline" id="edit-article-btn">✏️ Edit Article</a>
+          <button
+            class="btn btn--ghost"
+            id="copy-link-btn"
+            onclick="navigator.clipboard.writeText(window.location.href).then(() => window.showToast('Link copied to clipboard!'))"
+            title="Copy article link"
+          >🔗 Copy Link</button>
+        </div>
+      </header>
+
+      <!-- Rendered Markdown Content -->
+      <div class="article-content" id="article-body">
+        {{ article.html_content | safe }}
+      </div>
+
+      <!-- Tags footer -->
+      {% if tag_list %}
+      <footer style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid var(--border);">
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.08em;">
+          Tags
+        </div>
+        <div class="tags-row">
+          {% for tag in tag_list %}
+          <a href="/search?q={{ tag | urlencode }}" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+      </footer>
+      {% endif %}
+
+    </article>
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+    <aside class="sidebar" aria-label="Article sidebar">
+
+      <!-- Article Info Widget -->
+      <div class="sidebar-widget">
+        <div class="sidebar-widget__header">Article Info</div>
+        <div class="sidebar-widget__body" style="padding: 0;">
+          <div class="sidebar-meta-row" style="padding: 8px 16px;">
+            <span class="sidebar-meta-label">Category</span>
+            <span class="sidebar-meta-value">
+              <a href="/category/{{ article.category | urlencode }}" style="color: var(--accent-primary);">{{ article.category }}</a>
+            </span>
+          </div>
+          <div class="sidebar-meta-row" style="padding: 8px 16px;">
+            <span class="sidebar-meta-label">Created</span>
+            <span class="sidebar-meta-value">{{ article.created_at | format_date }}</span>
+          </div>
+          <div class="sidebar-meta-row" style="padding: 8px 16px;">
+            <span class="sidebar-meta-label">Updated</span>
+            <span class="sidebar-meta-value">{{ article.updated_at | format_date }}</span>
+          </div>
+          <div class="sidebar-meta-row" style="padding: 8px 16px;">
+            <span class="sidebar-meta-label">Views</span>
+            <span class="sidebar-meta-value">{{ article.view_count }}</span>
+          </div>
+          <div class="sidebar-meta-row" style="padding: 8px 16px;">
+            <span class="sidebar-meta-label">Slug</span>
+            <span class="sidebar-meta-value" style="font-family: var(--font-mono); font-size: 0.75rem;">{{ article.slug }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Articles Widget -->
+      {% if recent_articles %}
+      <div class="sidebar-widget">
+        <div class="sidebar-widget__header">Recent Articles</div>
+        <div class="sidebar-widget__body" style="padding: 8px;">
+          <ul class="sidebar-nav-list">
+            {% for ra in recent_articles %}
+            <li class="sidebar-nav-item {% if ra.slug == article.slug %}is-active{% endif %}">
+              <a href="/wiki/{{ ra.slug }}">{{ ra.title }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Browse Categories Widget -->
+      {% if categories %}
+      <div class="sidebar-widget">
+        <div class="sidebar-widget__header">Categories</div>
+        <div class="sidebar-widget__body" style="padding: 8px;">
+          <ul class="sidebar-nav-list">
+            {% for cat in categories %}
+            <li class="sidebar-nav-item {% if cat.category == article.category %}is-active{% endif %}">
+              <a href="/category/{{ cat.category | urlencode }}">{{ cat.category }} <span style="color:var(--text-muted);font-size:0.72rem;">({{ cat.article_count }})</span></a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Edit CTA -->
+      <div style="padding: var(--space-md); background: var(--accent-subtle); border: 1px solid rgba(155,28,46,0.2); border-radius: var(--radius-md); text-align: center;">
+        <p style="font-size:0.8rem; color: var(--text-secondary); margin-bottom: var(--space-sm);">
+          See something wrong or missing?
+        </p>
+        <a href="/wiki/{{ article.slug }}/edit" class="btn btn--primary" id="sidebar-edit-btn" style="width: 100%; justify-content: center;">
+          ✏️ Edit This Page
+        </a>
+      </div>
+
+    </aside>
+  </div>
+</div>
+{% endblock %}
