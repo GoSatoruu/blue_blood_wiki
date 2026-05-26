@@ -7,7 +7,7 @@ import aiosqlite
 import os
 from datetime import datetime, timezone
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "wiki.db")
+DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "wiki.db"))
 
 
 async def get_db() -> aiosqlite.Connection:
