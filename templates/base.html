@@ -18,10 +18,10 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩸</text></svg>">
 
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', path='css/wiki.css') }}">
+  <link rel="stylesheet" href="/static/css/wiki.css">
 
   <!-- Theme script runs FIRST to prevent flash of wrong theme -->
-  <script src="{{ url_for('static', path='js/theme.js') }}"></script>
+  <script src="/static/js/theme.js"></script>
 
   {% block extra_head %}{% endblock %}
 </head>
@@ -93,7 +93,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- ── Scripts ────────────────────────────────────────────────────────── -->
-  <script src="{{ url_for('static', path='js/search.js') }}"></script>
+  <script src="/static/js/search.js"></script>
   {% block extra_scripts %}{% endblock %}
 
   <script>

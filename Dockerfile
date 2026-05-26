@@ -16,5 +16,5 @@ COPY . .
 # Expose port (Cloud Run will override this via the PORT environment variable)
 EXPOSE 8080
 
-# Start uvicorn, resolving the PORT variable dynamically
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8080}"]
+# Start uvicorn, resolving the PORT variable dynamically with proxy headers trusted
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*'"]
